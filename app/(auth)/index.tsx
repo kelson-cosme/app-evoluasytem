@@ -7,12 +7,12 @@ import {
   View,
   TextInput,
   Button,
-  SafeAreaView,
   ActivityIndicator,
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router'; // Importe o router para navegar
 import { supabase } from '../../src/lib/supabase'; // Importe o seu cliente supabase
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
   const [inputCode, setInputCode] = useState('');
@@ -67,7 +67,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Plano Protegido</Text>
+        <Text style={styles.title}>Plano Protegido hahah</Text>
         <Text style={styles.description}>
           Insira o seu ID de Acesso para ver o seu plano.
         </Text>

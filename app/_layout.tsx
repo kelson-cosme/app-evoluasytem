@@ -4,10 +4,10 @@ import { Stack } from 'expo-router';
 export default function RootLayout() {
   return (
     <Stack>
-      {/* A tela de login (index) fica aqui */}
-      <Stack.Screen name="index" options={{ headerShown: false }} /> 
-      
-      {/* O grupo (main) é o nosso app principal, também sem header aqui */}
+      {/* O grupo (auth) contém a tela de login */}
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} /> 
+
+      {/* O grupo (main) contém as telas do app (plano, etc.) */}
       <Stack.Screen name="(main)" options={{ headerShown: false }} />
     </Stack>
   );

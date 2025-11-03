@@ -1,29 +1,29 @@
 // app/(main)/plan.tsx
-import { Text, View, ActivityIndicator } from 'react-native';
+import { Text, View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../src/lib/supabase'; // Importe o seu cliente
 
-// No futuro, você vai copiar suas interfaces de 'types.ts' para cá
-// interface Plan { ... } 
-// interface Patient { ... }
-
 export default function PlanScreen() {
-  // 1. Obter o ID do paciente passado da tela de login
   const { patientId } = useLocalSearchParams<{ patientId: string }>();
-
+  
   const [loading, setLoading] = useState(true);
-  const [plan, setPlan] = useState<any>(null); // Use 'any' por enquanto
+  const [plan, setPlan] = useState<any>(null); // Usar 'any' por enquanto
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (patientId) {
       loadActivePlan();
+    } else {
+      setErrorMessage("ID do Paciente não encontrado.");
+      setLoading(false);
     }
   }, [patientId]);
 
-  // 2. Lógica de busca de dados (copiada de PatientView.tsx)
   const loadActivePlan = async () => {
     setLoading(true);
+    setErrorMessage('');
+    
     const { data: planData, error } = await supabase
       .from("plans")
       .select("*")
@@ -31,24 +31,62 @@ export default function PlanScreen() {
       .eq("is_active", true) 
       .maybeSingle();
 
-    if (planData) {
+    if (error) {
+      // Erro real (ex: RLS, rede)
+      setErrorMessage("Erro ao carregar o plano.");
+      console.error("Erro Supabase:", error);
+    } else if (planData) {
+      // Sucesso!
       setPlan(planData);
     } else {
-      console.error(error);
+      // Não é um erro, apenas não encontrou
+      setErrorMessage("Nenhum plano ativo foi encontrado para você. Fale com o seu profissional.");
     }
+    
     setLoading(false);
   };
 
   if (loading) {
-    return <ActivityIndicator style={{ flex: 1, justifyContent: 'center' }} />;
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" />
+        <Text>A carregar o seu plano...</Text>
+      </View>
+    );
   }
 
+  if (errorMessage) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Oops!</Text>
+        <Text>{errorMessage}</Text>
+      </View>
+    );
+  }
+
+  // Só renderiza isto se o plano existir
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 22, fontWeight: 'bold' }}>Plano Carregado!</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Plano Carregado!</Text>
       <Text>ID do Paciente: {patientId}</Text>
-      <Text>Nome do Plano: {plan?.name || 'Sem nome'}</Text>
-      {/* Aqui você começará a construir a UI para mostrar a dieta e o treino */}
+      <Text>Nome do Plano: {plan?.name || 'Plano principal'}</Text>
+      {/* Aqui é onde você vai começar a construir a UI
+        para mostrar a dieta e o treino, similar ao seu PatientView.tsx
+      */}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  }
+});
